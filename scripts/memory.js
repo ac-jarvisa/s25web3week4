@@ -48,6 +48,86 @@ for(let i=0; i<12; i++){
 
 //when the user clicks on the card...
 function flipCard(){
-    
+    //check to make sure this card isn't click on already - that it's
+    //class has not been set to cardFlipped
+    // != checks if something is not equal to
+    if(this.className != "cardFlipped"){
+        //change the card's class
+        this.className = "cardFlipped";
+
+        //get a random number between 0 and 11 (because the first position of an array is 0)
+        // Math.random() gets you a random decimal between 0 and 1 (like 0.45, 0.87)
+        // multiply the random number by 12, then subtract a small amount so it never actually
+        // hits 12
+        // Math.floor() rounds a number down
+        let ran = Math.floor(Math.random()*12-0.001);
+        
+        //based on the random number, assign the card an ID (from the colourPool array)
+        this.id = colourPool[ran];
+
+        //since the card has been clicked, add it to the array that holds which
+        //cards are clicked
+        //.push adds something to the end of an array
+        clickedCards.push(this);
+        
+        //check to see if there are two cards in the array
+        //then check to see if there is a match
+        if(clickedCards.length == 2){
+            //check to see if the two cards have the same id
+            if(clickedCards[0].id == clickedCards[1].id){
+                //call the function to create an overlay message
+                //send it the value "match"
+                createOverlay("match");
+            }else{
+                //call the function to create an overlay message
+                createOverlay("nomatch");
+
+                //if it's not a match, flip the cards back over...
+                //the forEach loop looks at an array and does something to each thing
+                //in that array
+                //you have to pass it a temporary variable (we're using thisCard)
+                //to store each item in the array
+                clickedCards.forEach(function(thisCard){
+                    thisCard.className = "card";
+                });
+            }
+            //make the array an empty array, regardless of whether there's a match or not
+            clickedCards = [];
+        }
+    }
+}
+
+
+//this function creates an overlay to display a message to the user
+//"messageType" is a variable to store the information sent
+//to the function (when we called it)
+function createOverlay(messageType){
+    //create a div for the overlay background, give it an id
+    //add it to the body element (outside of the rest of your HTML)
+    const overlay = document.createElement("div");
+    overlay.id = "overlay";
+    //add the event listener to remove the overlay when clicked
+    overlay.addEventListener("click", totalExistenceFailure);
+
+    //add a message to the overlay
+    const para = document.createElement("p");
+    //check which type of overlay this is
+    //use the switch statement for multiple options
+   switch(messageType){
+        case "nomatch":
+            para.textContent = "No Match!";
+            break; //stops the switch statement from running
+        case "match":
+            para.textContent = "Match!";
+            break; //stops the switch statement from running            
+    }
+    overlay.appendChild(para);
+
+    document.querySelector("body").appendChild(overlay);
+}
+
+function totalExistenceFailure(){
+    //we have to get the element's parent to remove the element
+    this.parentNode.removeChild(this);
 }
 
