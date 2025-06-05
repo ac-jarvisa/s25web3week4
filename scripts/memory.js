@@ -55,16 +55,31 @@ function flipCard(){
         //change the card's class
         this.className = "cardFlipped";
 
-        //get a random number between 0 and 11 (because the first position of an array is 0)
-        // Math.random() gets you a random decimal between 0 and 1 (like 0.45, 0.87)
-        // multiply the random number by 12, then subtract a small amount so it never actually
-        // hits 12
-        // Math.floor() rounds a number down
-        let ran = Math.floor(Math.random()*12-0.001);
-        
-        //based on the random number, assign the card an ID (from the colourPool array)
-        this.id = colourPool[ran];
+        //add to the count of moves
+        moves++;
+        //add text to the page that shows the player the number of moves
+        document.querySelector("#moves").textContent = "Moves: " + moves;
 
+        //check to see if this card doesn't have an id
+        if(this.id == ""){
+            //get a random number between 0 and 11 (because the first position of an array is 0)
+            // Math.random() gets you a random decimal between 0 and 1 (like 0.45, 0.87)
+            // multiply the random number by 12, then subtract a small amount so it never actually
+            // hits 12
+            // Math.floor() rounds a number down
+            // ...instead of the fixed value of 12, use the length of the array
+            let ran = Math.floor(Math.random()*colourPool.length-0.001);
+            
+            //based on the random number, assign the card an ID (from the colourPool array)
+            this.id = colourPool[ran];
+
+            //remove that ID from the array
+            colourPool.splice(ran, 1);
+            //splice removes things from arrays
+            //it needs two values: the position in the array to start from,
+            //and how many things to remove
+            console.log(colourPool);
+        }
         //since the card has been clicked, add it to the array that holds which
         //cards are clicked
         //.push adds something to the end of an array
@@ -75,24 +90,26 @@ function flipCard(){
         if(clickedCards.length == 2){
             //check to see if the two cards have the same id
             if(clickedCards[0].id == clickedCards[1].id){
-                //call the function to create an overlay message
-                //send it the value "match"
-                createOverlay("match");
+                //if there's a match, add 1 to the match score
+                score++;
+
+                //if there are 6 matches, the user has won
+                if(score == 6){
+                    createOverlay("won");
+                }else{
+                    //call the function to create an overlay message
+                    //send it the value "match"
+                    createOverlay("match");
+                }
+
+                //if there was a match, empty the array so no cards get flipped back
+                clickedCards = [];
             }else{
                 //call the function to create an overlay message
                 createOverlay("nomatch");
 
-                //if it's not a match, flip the cards back over...
-                //the forEach loop looks at an array and does something to each thing
-                //in that array
-                //you have to pass it a temporary variable (we're using thisCard)
-                //to store each item in the array
-                clickedCards.forEach(function(thisCard){
-                    thisCard.className = "card";
-                });
+                
             }
-            //make the array an empty array, regardless of whether there's a match or not
-            clickedCards = [];
         }
     }
 }
@@ -116,10 +133,15 @@ function createOverlay(messageType){
    switch(messageType){
         case "nomatch":
             para.textContent = "No Match!";
+            para.classList.add("bad");
             break; //stops the switch statement from running
         case "match":
             para.textContent = "Match!";
-            break; //stops the switch statement from running            
+            para.classList.add("good");
+            break; //stops the switch statement from running 
+        case "won":
+            para.textContent = "You Won!";
+            para.classList.add("good");        
     }
     overlay.appendChild(para);
 
@@ -129,5 +151,23 @@ function createOverlay(messageType){
 function totalExistenceFailure(){
     //we have to get the element's parent to remove the element
     this.parentNode.removeChild(this);
+
+    //after the message is destroyed, then we should flip the cards over
+    flipCardsBack();
 }
 
+function flipCardsBack(){
+    //this function will flip the cards over if there is no match
+
+    //if it's not a match, flip the cards back over...
+    //the forEach loop looks at an array and does something to each thing
+    //in that array
+    //you have to pass it a temporary variable (we're using thisCard)
+    //to store each item in the array
+    clickedCards.forEach(function(thisCard){
+        thisCard.className = "card";
+    });
+
+    //empty the array after flipping any non-matching cards over
+    clickedCards = [];
+}
